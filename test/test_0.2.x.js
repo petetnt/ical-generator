@@ -137,7 +137,34 @@ describe('ical-generator 0.2.x / ICalCalendar', function() {
 			});
 		});
 
-		describe('createEvent()', function() {
+        describe('ttl()', function() {
+            it('setter should return this', function() {
+                var cal = ical();
+                assert.deepEqual(cal, cal.ttl(86400));
+            });
+
+            it('getter should return value', function() {
+                var cal = ical().ttl(86400);
+                assert.equal(cal.ttl(), 86400);
+            });
+
+            it('should change something', function() {
+                var cal = ical().ttl(822610), str;
+                cal.createEvent({
+                    start: new Date(),
+                    end: new Date(new Date().getTime() + 3600000),
+                    summary: 'Example Event'
+                });
+
+                str = cal.toString();
+                console.log(str);
+                assert.ok(str.indexOf('X-PUBLISHED-TTL') > -1);
+                assert.ok(str.indexOf('REFRESH-INTERVAL') > -1);
+                assert.ok(str.indexOf('1W2D12H30M10S\n') > -1);
+            });
+        });
+
+        describe('createEvent()', function() {
 			it('should return a ICalEvent instance', function() {
 				var cal = ical(),
 					ICalEvent = require('../lib/event.js');
@@ -1013,7 +1040,7 @@ describe('ical-generator 0.2.x / ICalCalendar', function() {
 			});
 
 			it('case #6 (attendee with simple delegation)', function() {
-				var cal = ical({domain: 'sebbo.net', prodId: '//sebbo.net//ical-generator.tests//EN'});
+				var cal = ical({domain: 'sebbo.net', prodId: '//sebbo.net//ical-generator.tests//EN', ttl: 60 * 60 * 12});
 				cal.createEvent({
 					id: '123',
 					start: new Date('Fr Oct 04 2013 22:39:30 UTC'),
